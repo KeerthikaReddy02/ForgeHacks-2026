@@ -18,3 +18,15 @@ uv run streamlit run frontend/app.py         # :8501 (FIREWATCH_API to override 
 | `GET /api/regions/risk` | `services/regions.py` |
 
 *Predictions are informational and not a substitute for official emergency alerts.*
+
+## Deploy to Heroku
+One web dyno runs both processes (`start.sh`): Streamlit on `$PORT`, FastAPI internally on `127.0.0.1:8000`. The Python buildpack installs from `pyproject.toml` + `uv.lock`; `.python-version` pins 3.11.
+```
+heroku login
+heroku create <app-name>
+heroku stack:set heroku-24
+git push heroku feat/init-scaffold:main     # or: git push heroku main
+heroku open
+heroku logs --tail
+```
+Later: set LLM/model secrets with `heroku config:set KEY=value`. Large model files (PyTorch) can exceed Heroku's 500 MB slug limit; use CPU-only torch or load weights from external storage.

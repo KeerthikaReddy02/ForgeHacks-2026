@@ -1,0 +1,8 @@
+{
+  "name": "firewatch",
+  "description": "Wildfire risk app: FastAPI backend + Streamlit frontend on one web dyno.",
+  "stack": "heroku-24",
+  "buildpacks": [{ "url": "heroku/python" }],
+  "formation": { "web": { "quantity": 1, "size": "basic" } },
+  "env": { "FIREWATCH_API": { "value": "http://127.0.0.1:8000" } }
+}
