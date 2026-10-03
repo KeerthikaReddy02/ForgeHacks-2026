@@ -1,0 +1,18 @@
+[project]
+name = "firewatch"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "python-multipart",
+    "pydantic>=2",
+    "pillow",
+    "numpy",
+    "streamlit",
+    "requests",
+    "pandas",
+]
+
+[dependency-groups]
+dev = ["httpx"]
