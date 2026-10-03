@@ -1,6 +1,6 @@
-# FireWatch (mock stage)
+# FireWatch
 
-Wildfire risk app: FastAPI backend + Streamlit frontend. All AI endpoints are **mocks** in `backend/services/`; replace each function body with the real model/LLM call (signatures stay the same).
+Wildfire risk app: FastAPI backend + Streamlit frontend. Image and disaster endpoints use trained models (see *Train the models*); the preparedness and map endpoints are still mocks in `backend/services/`.
 
 ## Run
 ```
@@ -30,3 +30,25 @@ heroku open
 heroku logs --tail
 ```
 Later: set LLM/model secrets with `heroku config:set KEY=value`. Large model files (PyTorch) can exceed Heroku's 500 MB slug limit; use CPU-only torch or load weights from external storage.
+
+## Train the models
+Image and disaster endpoints use the trained models in `models/` when present and fall back to mock output (`"mock": true`) when not.
+```
+# 1. Data (needs Kaggle credentials: ~/.kaggle/kaggle.json or KAGGLE_USERNAME/KAGGLE_KEY)
+uv run --group train python -m backend.ml.download_data     # -> data/wildfire, data/disaster
+
+# 2. Wildfire satellite classifier: EfficientNet-B0 fine-tune -> models/vision.pt
+uv run python -m backend.ml.train_vision --epochs 4          # add --max-per-class 2000 for a quick run
+
+# 3. Disaster classifier: auto-detects schema, picks best of LogReg / RandomForest / HistGB by CV
+uv run python -m backend.ml.train_disaster                   # or --file X.csv --target COL
+```
+Metrics (accuracy, per-class precision/recall/F1, confusion matrix) are written to `models/*_metrics.json` and served at `GET /api/model-info`. Commit the `models/` files so Heroku ships them.
+
+### Results
+_Fill in after training on the real datasets (copy from `models/*_metrics.json`)._
+
+| Model | Accuracy | Precision | Recall |
+|---|---|---|---|
+| Wildfire image (EfficientNet-B0) | | | |
+| Disaster type (best of 3) | | | |

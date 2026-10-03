@@ -1,11 +1,14 @@
+import json
+
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from .schemas import (DisasterInput, DisasterPrediction, ImagePrediction,
                       Preparedness, PreparednessRequest, RegionRisk)
+from .ml.paths import DISASTER_METRICS, VISION_METRICS
 from .services import disaster, preparedness, regions, vision
 
-app = FastAPI(title="FireWatch API (mock)")
+app = FastAPI(title="FireWatch API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 
@@ -37,3 +40,9 @@ def get_preparedness(body: PreparednessRequest):
 @app.get("/api/regions/risk", response_model=list[RegionRisk])
 def region_risk():
     return regions.region_risks()
+
+
+@app.get("/api/model-info")
+def model_info():
+    load = lambda p: json.loads(p.read_text()) if p.exists() else None
+    return {"vision": load(VISION_METRICS), "disaster": load(DISASTER_METRICS)}

@@ -12,7 +12,24 @@ dependencies = [
     "streamlit",
     "requests",
     "pandas",
+    "torch>=2.14.1",
+    "torchvision>=0.29.1",
+    "scikit-learn>=1.7.2",
+    "joblib>=1.6.0",
 ]
 
 [dependency-groups]
 dev = ["httpx"]
+train = [
+    "kaggle>=1.7.4.5",
+]
+
+# Linux (Heroku) gets the small CPU-only torch wheels to stay under the 500 MB slug limit.
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
+torchvision = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true

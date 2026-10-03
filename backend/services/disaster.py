@@ -1,12 +1,16 @@
-"""Disaster-type classifier. MOCK: swap `predict_disaster` for a scikit-learn pipeline."""
+"""Disaster-type classifier: real scikit-learn engine if models/disaster.joblib exists, else mock."""
+import logging
+
 import numpy as np
 
+from ..ml.paths import DISASTER_MODEL
 from ..schemas import ClassProb, DisasterInput, DisasterPrediction, FeatureContribution
 
+log = logging.getLogger(__name__)
 CLASSES = ["Wildfire", "Flood", "Drought", "Hurricane", "Earthquake", "Heatwave"]
 
 
-def predict_disaster(inp: DisasterInput) -> DisasterPrediction:
+def mock_predict_disaster(inp: DisasterInput) -> DisasterPrediction:
     # crude heuristic scores so the demo responds sensibly to inputs
     scores = {
         "Wildfire": inp.temperature_c / 40 + (100 - inp.humidity_pct) / 100 - inp.rainfall_mm / 100,
@@ -31,3 +35,20 @@ def predict_disaster(inp: DisasterInput) -> DisasterPrediction:
         top3=[ClassProb(label=CLASSES[i], probability=round(float(p[i]), 3)) for i in order],
         top_features=sorted(feats, key=lambda f: -abs(f.contribution)),
     )
+
+
+_engine = None
+_engine_tried = False
+
+
+def predict_disaster(inp: DisasterInput) -> DisasterPrediction:
+    global _engine, _engine_tried
+    if not _engine_tried:
+        _engine_tried = True
+        if DISASTER_MODEL.exists():
+            from ..ml.disaster_engine import DisasterEngine
+
+            _engine = DisasterEngine()
+        else:
+            log.warning("%s missing, using mock disaster predictions", DISASTER_MODEL)
+    return _engine.predict(inp) if _engine else mock_predict_disaster(inp)

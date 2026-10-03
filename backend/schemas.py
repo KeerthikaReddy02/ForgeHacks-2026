@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -16,6 +16,7 @@ class DisasterInput(BaseModel):
     rainfall_mm: float = 10.0
     humidity_pct: float = 40.0
     description: str = ""
+    features: dict[str, Union[float, str]] = Field(default_factory=dict)  # exact dataset columns
 
 
 class ClassProb(BaseModel):

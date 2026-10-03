@@ -10,3 +10,6 @@ __pycache__/
 # Local agent tooling
 .claude/
 .agents/
+
+# Datasets (large; download with backend.ml.download_data)
+data/
