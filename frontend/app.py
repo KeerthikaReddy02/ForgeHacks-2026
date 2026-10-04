@@ -10,6 +10,9 @@ API = os.getenv("FIREWATCH_API", "http://localhost:8000")
 def api(method, path, **kw):
     try:
         r = requests.request(method, f"{API}{path}", timeout=30, **kw)
+        if r.status_code == 422 and isinstance(r.json().get("detail"), str):
+            st.warning(r.json()["detail"], icon=":material/info:")
+            return None
         r.raise_for_status()
         return r.json()
     except Exception as e:
@@ -37,6 +40,8 @@ with st.container(border=True):
     if ss.image_result:
         r = ss.image_result
         risk = r["confidence"] if r["label"] == "Wildfire" else 1 - r["confidence"]
+        if r.get("mock"):
+            st.caption(":material/science: Demo output (no trained model loaded)")
         st.metric("Result", r["label"], f"{r['confidence']:.0%} confidence", delta_color="off")
         st.progress(risk, text=f"Wildfire risk: {risk:.0%}")
         st.image(
@@ -47,20 +52,28 @@ with st.container(border=True):
 
 with st.container(border=True):
     st.header("Conditions")
+    st.caption("Fill in only the measurements you actually have. Leave the rest blank.")
     with st.form("conditions", border=False):
         region = st.text_input("Region", ss.region)
-        temp = st.number_input("Temperature (°C)", -30.0, 60.0, 32.0)
-        rain = st.number_input("Rainfall (mm)", 0.0, 1000.0, 5.0)
-        hum = st.number_input("Humidity (%)", 0.0, 100.0, 25.0)
+        with st.container(horizontal=True):
+            temp = st.number_input("Temperature (°C)", -60.0, 70.0, None, placeholder="Not measured")
+            hum = st.number_input("Humidity (%)", 0.0, 100.0, None, placeholder="Not measured")
+            rain = st.number_input("Rainfall (mm)", 0.0, 2000.0, None, placeholder="Not measured")
+        with st.container(horizontal=True):
+            wind = st.number_input("Wind speed (km/h)", 0.0, 500.0, None, placeholder="Not measured")
+            mag = st.number_input("Quake magnitude", 0.0, 10.0, None, placeholder="Not measured")
+            depth = st.number_input("Quake depth (km)", 0.0, 800.0, None, placeholder="Not measured")
         desc = st.text_area("Description (optional)")
         submitted = st.form_submit_button("Predict disaster", type="primary", icon=":material/query_stats:")
     if submitted:
         ss.region = region
-        ss.disaster_result = api("POST", "/api/predict/disaster", json={
-            "region": region, "temperature_c": temp, "rainfall_mm": rain,
-            "humidity_pct": hum, "description": desc})
+        payload = {"region": region, "description": desc, "temperature_c": temp, "humidity_pct": hum,
+                   "rainfall_mm": rain, "wind_speed_kmh": wind, "magnitude": mag, "depth_km": depth}
+        ss.disaster_result = api("POST", "/api/predict/disaster", json=payload)
     if ss.disaster_result:
         d = ss.disaster_result
+        if d.get("mock"):
+            st.caption(":material/science: Demo output (no trained model loaded)")
         st.subheader("Top 3 predictions")
         for p in d["top3"]:
             st.progress(p["probability"], text=f"{p['label']}: {p['probability']:.0%}")
@@ -69,6 +82,19 @@ with st.container(border=True):
             pd.DataFrame(d["top_features"]).set_index("feature"),
             alt="Bar chart of how much each input feature contributed to the prediction",
         )
+
+with st.expander("Model performance", icon=":material/monitoring:"):
+    info = api("GET", "/api/model-info") or {}
+    for key, title in (("vision", "Satellite image model"), ("disaster", "Disaster type model")):
+        m = info.get(key)
+        st.markdown(f"**{title}**")
+        if not m:
+            st.caption("No metrics available yet.")
+            continue
+        st.write(f"Accuracy: {m['accuracy']:.1%} on {m.get('n') or m.get('n_test')} held-out samples")
+        st.dataframe(pd.DataFrame(m["per_class"]).T, alt=f"Per-class precision, recall and F1 for the {title.lower()}")
+        st.dataframe(pd.DataFrame(m["confusion_matrix"], index=m["labels"], columns=m["labels"]),
+                     alt=f"Confusion matrix for the {title.lower()}")
 
 with st.container(border=True):
     st.header("Risk map")

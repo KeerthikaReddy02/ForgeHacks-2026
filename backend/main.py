@@ -29,7 +29,10 @@ async def predict_image(file: UploadFile = File(...)):
 
 @app.post("/api/predict/disaster", response_model=DisasterPrediction)
 def predict_disaster(body: DisasterInput):
-    return disaster.predict_disaster(body)
+    try:
+        return disaster.predict_disaster(body)
+    except ValueError as e:
+        raise HTTPException(422, str(e))
 
 
 @app.post("/api/preparedness", response_model=Preparedness)
