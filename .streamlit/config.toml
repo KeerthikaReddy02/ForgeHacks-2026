@@ -1,0 +1,24 @@
+# Theme lives here (not in CSS) so every Streamlit widget picks it up automatically.
+[theme]
+primaryColor = "#d9480f"
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+baseRadius = "12px"
+showWidgetBorder = true
+linkUnderline = false
+headingFontWeights = [700, 650, 600, 600, 600, 600]
+
+# Separate light/dark palettes -> users get a theme switcher in the settings menu
+[theme.light]
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#fff4ec"
+textColor = "#2b2118"
+borderColor = "#f1d9c8"
+chartCategoricalColors = ["#d9480f", "#f59f00", "#e03131", "#1c7ed6", "#2f9e44", "#7048e8"]
+
+[theme.dark]
+primaryColor = "#ff7a3d"
+backgroundColor = "#14100d"
+secondaryBackgroundColor = "#221a15"
+textColor = "#f5ebe3"
+borderColor = "#3a2d24"
+chartCategoricalColors = ["#ff7a3d", "#ffc53d", "#ff6b6b", "#4dabf7", "#51cf66", "#9775fa"]
