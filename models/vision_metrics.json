@@ -1,27 +1,27 @@
 {
   "model": "resnet18",
-  "accuracy": 0.9927,
-  "roc_auc": 0.9997,
+  "accuracy": 0.9746,
+  "roc_auc": 0.997,
   "per_class": {
     "nowildfire": {
-      "precision": 0.995,
-      "recall": 0.9887,
-      "f1": 0.9918
+      "precision": 0.9696,
+      "recall": 0.9738,
+      "f1": 0.9717
     },
     "wildfire": {
-      "precision": 0.9909,
-      "recall": 0.996,
-      "f1": 0.9934
+      "precision": 0.9787,
+      "recall": 0.9753,
+      "f1": 0.977
     }
   },
   "confusion_matrix": [
     [
-      2788,
-      32
+      2746,
+      74
     ],
     [
-      14,
-      3466
+      86,
+      3394
     ]
   ],
   "labels": [
