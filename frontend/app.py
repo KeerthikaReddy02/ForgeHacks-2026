@@ -68,7 +68,7 @@ with st.sidebar:
 
     # st.context.theme.type is "light" or "dark". Both palettes are defined in
     # .streamlit/config.toml; users switch via the app menu (top right) > Settings > Theme.
-    mode = st.context.theme.type
+    mode = st.context.theme.type or "light"  # None until the browser reports its theme
     st.caption(f":material/{'dark_mode' if mode == 'dark' else 'light_mode'}: {mode.capitalize()} mode (change in Settings)")
 
     st.caption(
