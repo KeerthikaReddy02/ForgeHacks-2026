@@ -66,6 +66,11 @@ with st.sidebar:
     else:
         st.badge("API offline", icon=":material/error:", color="red")
 
+    # st.context.theme.type is "light" or "dark". Both palettes are defined in
+    # .streamlit/config.toml; users switch via the app menu (top right) > Settings > Theme.
+    mode = st.context.theme.type
+    st.caption(f":material/{'dark_mode' if mode == 'dark' else 'light_mode'}: {mode.capitalize()} mode (change in Settings)")
+
     st.caption(
         "Predictions are informational only and not a substitute for official emergency alerts."
     )
