@@ -33,3 +33,6 @@ torchvision = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
 name = "pytorch-cpu"
 url = "https://download.pytorch.org/whl/cpu"
 explicit = true
+
+[tool.vercel]
+entrypoint = "backend.main:app"
