@@ -1,8 +1,6 @@
 """Home page: showcases the app and its two ways to assess risk."""
 import streamlit as st
 
-from common import cached_get
-
 ss = st.session_state
 
 
@@ -17,16 +15,6 @@ st.write(
     "FireWatch combines satellite imagery and on-the-ground measurements with machine learning "
     "to estimate risk and explain what drove each prediction."
 )
-
-# Headline numbers from the 5-year global fire history
-hist = cached_get("/api/regions/history") or []
-if hist:
-    events = sum(r["events"] for r in hist)
-    years = sorted({r["year"] for r in hist})
-    m1, m2, m3 = st.columns(3)  # equal-width columns keep the cards the same size
-    m1.metric("Wildfire events reported (NASA EONET)", f"{events:,}", border=True)
-    m2.metric("Map areas with activity", f"{len({(r['lat'], r['lon']) for r in hist}):,}", border=True)
-    m3.metric("Years covered", f"{years[0]}–{years[-1]}", border=True)
 
 # ---------------------------------------------------------------- the two methods
 st.header("Three ways to explore risk")

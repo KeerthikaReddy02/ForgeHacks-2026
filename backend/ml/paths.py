@@ -9,4 +9,3 @@ VISION_MODEL = MODELS / "vision.pt" if (MODELS / "vision.pt").exists() or not _N
 VISION_METRICS = MODELS / "vision_metrics.json"
 DISASTER_MODEL = MODELS / "disaster.joblib"
 DISASTER_METRICS = MODELS / "disaster_metrics.json"
-FIRE_HISTORY = ROOT / "backend/data/fire_history.csv"

@@ -13,4 +13,3 @@ __pycache__/
 
 # Datasets (large; download with backend.ml.download_data)
 data/
-!backend/data/
