@@ -22,9 +22,9 @@ def api(method, path, **kw):
 
 # Caching: GET data rarely changes, so reuse it for 60s instead of refetching on every rerun.
 @st.cache_data(ttl=60, show_spinner=False)
-def cached_get(path):
+def cached_get(path, timeout=30):
     try:
-        r = requests.get(f"{API}{path}", timeout=30)
+        r = requests.get(f"{API}{path}", timeout=timeout)
         r.raise_for_status()
         return r.json()
     except Exception:
