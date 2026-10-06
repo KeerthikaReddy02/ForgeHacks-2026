@@ -9,6 +9,7 @@ from .ml.paths import DISASTER_METRICS, VISION_METRICS
 from .services import disaster, history, preparedness, regions, vision
 
 app = FastAPI(title="FireWatch API")
+
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 
@@ -46,8 +47,11 @@ def region_risk():
 
 
 @app.get("/api/regions/history")
-def region_history():
-    return history.fire_history()
+def region_history(year: int):
+    try:
+        return history.events_for_year(year)
+    except Exception as e:
+        raise HTTPException(502, f"NASA EONET request failed: {e}")
 
 
 @app.get("/api/model-info")

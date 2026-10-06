@@ -24,39 +24,16 @@ st.set_page_config(page_title="FireWatch", page_icon=":material/local_fire_depar
 ss = st.session_state
 for k in ("image_result", "disaster_result"):
     ss.setdefault(k, None)
-ss.setdefault("region", "California")
 
 # 3. Navigation: each st.Page points to a script file. The first page is the default.
 pages = [
     st.Page("app_pages/home.py", title="Home", icon=":material/home:", default=True),
-    st.Page("app_pages/assess.py", title="Assess risk", icon=":material/query_stats:"),
-    st.Page("app_pages/risk_map.py", title="Risk map", icon=":material/public:"),
+    st.Page("app_pages/satellite.py", title="Satellite image", icon=":material/satellite_alt:"),
+    st.Page("app_pages/conditions.py", title="Conditions form", icon=":material/thermostat:"),
+    st.Page("app_pages/history.py", title="Historical map", icon=":material/public:"),
 ]
 page = st.navigation(pages)
-ss.assess_page = pages[1]  # lets other pages jump here with st.switch_page
-
-# ---------------------------------------------------------------- sidebar (shown on every page)
-with st.sidebar:
-    st.caption("Wildfire & disaster risk assistant")
-
-    # key="region" links this widget directly to ss.region
-    st.text_input("Region", key="region", icon=":material/location_on:")
-
-    if cached_get("/api/model-info") is not None:
-        st.badge("API connected", icon=":material/check_circle:", color="green")
-    else:
-        st.badge("API offline", icon=":material/error:", color="red")
-
-    # st.context.theme.type is "light" or "dark". Both palettes are defined in
-    # .streamlit/config.toml; users switch via the app menu (top right) > Settings > Theme.
-    mode = st.context.theme.type or "light"  # None until the browser reports its theme
-    st.caption(f":material/{'dark_mode' if mode == 'dark' else 'light_mode'}: {mode.capitalize()} mode (change in Settings)")
-
-    st.caption("Predictions are informational only and not a substitute for official emergency alerts.")
-
-# ---------------------------------------------------------------- run the selected page
-page.run()
-
+ss.pages = {p.title: p for p in pages}  # lets other pages jump to a page with st.switch_page
 
 # ---------------------------------------------------------------- model performance dialog
 # 5. @st.dialog turns a function into a pop-up. Calling it opens the modal.
@@ -78,8 +55,33 @@ def show_model_performance():
                          alt=f"Confusion matrix for the {title.lower()}")
 
 
-# ---------------------------------------------------------------- footer (shown on every page)
-st.space("large")
-with st.container(horizontal=True, horizontal_alignment="center"):
-    if st.button("Model performance", icon=":material/monitoring:"):
-        show_model_performance()
+# ---------------------------------------------------------------- sidebar (shown on every page)
+with st.sidebar:
+    st.caption("Wildfire & disaster risk assistant")
+
+    if cached_get("/api/model-info") is not None:
+        st.badge("API connected", icon=":material/check_circle:", color="green")
+    else:
+        st.badge("API offline", icon=":material/error:", color="red")
+
+    # st.context.theme.type is "light" or "dark". Both palettes are defined in
+    # .streamlit/config.toml; users switch via the app menu (top right) > Settings > Theme.
+    mode = st.context.theme.type or "light"  # None until the browser reports its theme
+    st.caption(f":material/{'dark_mode' if mode == 'dark' else 'light_mode'}: {mode.capitalize()} mode (change in Settings)")
+
+    st.caption("Predictions are informational only and not a substitute for official emergency alerts.")
+
+    # Sidebar content renders below the page links. The key gives this container a CSS class
+    # (.st-key-nav_footer) that the stylesheet below uses to pin it to the bottom.
+    with st.container(key="nav_footer"):
+        if st.button("Model performance", icon=":material/monitoring:", width="stretch"):
+            show_model_performance()
+
+# Streamlit has no native "sidebar footer", so this one small CSS rule pushes the container to the bottom.
+st.html("""<style>
+[data-testid="stSidebarContent"] { position: relative; }
+.st-key-nav_footer { position: absolute; bottom: 1rem; left: 1rem; width: calc(100% - 2rem); }
+</style>""")
+
+# ---------------------------------------------------------------- run the selected page
+page.run()
