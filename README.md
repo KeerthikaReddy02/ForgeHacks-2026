@@ -12,7 +12,7 @@ uv run streamlit run frontend/app.py         # :8501 (FIREWATCH_API to override 
 ## API
 | Endpoint | Swap-in |
 |---|---|
-| `POST /api/predict/image` (multipart `file`) | `services/vision.py` → PyTorch CNN + Grad-CAM |
+| `POST /api/predict/image` (multipart `file`) | `services/vision.py` → PyTorch CNN |
 | `POST /api/predict/disaster` | `services/disaster.py` → scikit-learn model |
 | `POST /api/preparedness` | `services/preparedness.py` → LLM |
 | `GET /api/regions/risk` | `services/regions.py` |

@@ -12,6 +12,8 @@ This file runs on EVERY page: it sets up the shared bits (sidebar, footer), then
 runs whichever page is selected.
 """
 
+from pathlib import Path
+
 import pandas as pd
 import streamlit as st
 
@@ -19,6 +21,8 @@ from common import cached_get
 
 # Must be the first Streamlit call. "wide" uses the full browser width.
 st.set_page_config(page_title="FireWatch", page_icon=":material/local_fire_department:", layout="wide")
+
+st.logo(str(Path(__file__).parent / "assets" / "logo.svg"), size="large")
 
 # 1. Session state: a dict that survives reruns. Initialise defaults once.
 ss = st.session_state
@@ -37,6 +41,9 @@ ss.pages = {p.title: p for p in pages}  # lets other pages jump to a page with s
 
 # ---------------------------------------------------------------- model performance dialog
 # 5. @st.dialog turns a function into a pop-up. Calling it opens the modal.
+KAGGLE = {"vision": "abdelghaniaaba/wildfire-prediction-dataset", "disaster": "devindergarg/natural-disaster-prediction-dataset"}
+
+
 @st.dialog("Model performance", width="large")
 def show_model_performance():
     info = cached_get("/api/model-info") or {}
@@ -49,6 +56,8 @@ def show_model_performance():
                 continue
             st.metric("Accuracy", f"{m['accuracy']:.1%}", f"{m.get('n') or m.get('n_test')} held-out samples",
                       delta_color="off")
+            if key in KAGGLE:
+                st.caption(f"Dataset: [{KAGGLE[key]}](https://www.kaggle.com/datasets/{KAGGLE[key]}) on Kaggle")
             t1, t2 = st.tabs(["Per-class", "Confusion matrix"])
             t1.dataframe(pd.DataFrame(m["per_class"]).T, alt=f"Per-class precision, recall and F1 for the {title.lower()}")
             t2.dataframe(pd.DataFrame(m["confusion_matrix"], index=m["labels"], columns=m["labels"]),
@@ -81,7 +90,18 @@ with st.sidebar:
 st.html("""<style>
 [data-testid="stSidebarContent"] { position: relative; }
 .st-key-nav_footer { position: absolute; bottom: 1rem; left: 1rem; width: calc(100% - 2rem); }
+.st-key-hero { background: rgba(180, 70, 27, 0.07); border-radius: 16px; padding: 2rem; }
+.st-key-hero h1 { font-size: 2.6rem; }
+.st-key-hero_card [data-testid="stHorizontalBlock"] { padding: 0.25rem 1rem 0.75rem; }
+.st-key-hero_card { background: var(--st-background-color); padding: 0; overflow: hidden; }
+[class*="st-key-card_"] .stElementContainer:has([data-testid="stButton"]) { margin-top: auto; }
+.eyebrow { color: var(--st-primary-color); font-size: .8rem; font-weight: 600; letter-spacing: .08em; margin: 0 0 .25rem; }
+h1 { letter-spacing: -0.02em; }
+.stButton > button { border-radius: 8px; }
 </style>""")
 
 # ---------------------------------------------------------------- run the selected page
 page.run()
+
+st.divider()
+st.caption("Team FireWatch · ForgeHacks 2026")

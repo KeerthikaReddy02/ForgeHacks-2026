@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field
 class ImagePrediction(BaseModel):
     label: str  # "Wildfire" | "No Wildfire"
     confidence: float
-    heatmap_png_b64: str  # Grad-CAM overlay, base64 PNG
     mock: bool = True
 
 
