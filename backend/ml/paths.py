@@ -9,3 +9,9 @@ VISION_MODEL = MODELS / "vision.pt" if (MODELS / "vision.pt").exists() or not _N
 VISION_METRICS = MODELS / "vision_metrics.json"
 DISASTER_MODEL = MODELS / "disaster.joblib"
 DISASTER_METRICS = MODELS / "disaster_metrics.json"
+
+WILDFIRE_DIR = ROOT / "backend" / "ml" / "wildfire_risk_prediction"
+WILDFIRE_MODEL = WILDFIRE_DIR / "wildfire_lgbm.pkl"
+WILDFIRE_EXPLAINER = WILDFIRE_DIR / "shap_explainer.pkl"
+WILDFIRE_DATA = WILDFIRE_DIR / "wildfire_data_csv.csv"
+WILDFIRE_METRICS= MODELS/"wildfire_metrics.json"

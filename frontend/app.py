@@ -25,11 +25,17 @@ ss = st.session_state
 for k in ("image_result", "disaster_result"):
     ss.setdefault(k, None)
 
+if "wildfire_result" not in st.session_state:
+    st.session_state.wildfire_result = None
+
+if "wildfire_error" not in st.session_state:
+    st.session_state.wildfire_error = None
+
 # 3. Navigation: each st.Page points to a script file. The first page is the default.
 pages = [
     st.Page("app_pages/home.py", title="Home", icon=":material/home:", default=True),
     st.Page("app_pages/satellite.py", title="Satellite image", icon=":material/satellite_alt:"),
-    st.Page("app_pages/conditions.py", title="Conditions form", icon=":material/thermostat:"),
+    st.Page("app_pages/conditions_new.py", title="Conditions form", icon=":material/thermostat:"),
     st.Page("app_pages/history.py", title="Historical map", icon=":material/public:"),
 ]
 page = st.navigation(pages)
@@ -40,7 +46,7 @@ ss.pages = {p.title: p for p in pages}  # lets other pages jump to a page with s
 @st.dialog("Model performance", width="large")
 def show_model_performance():
     info = cached_get("/api/model-info") or {}
-    for key, title in (("vision", "Satellite image model"), ("disaster", "Disaster type model")):
+    for key, title in (("vision", "Satellite image model"), ("wildfire", "Wildfire Risk model")):
         m = info.get(key)
         with st.container(border=True):
             st.subheader(title)

@@ -31,11 +31,10 @@ with left.container(border=True, height="stretch"):
 
 with mid.container(border=True, height="stretch"):
     st.subheader("Risk conditions form", icon=":material/thermostat:")
-    st.write("Enter whatever measurements you have and the model predicts which disaster is most likely.")
+    st.write("Enter whatever measurements you have and the model predicts the risk of wildfire.")
     st.markdown(
-        "- Temperature, humidity, rainfall, wind and quake data\n"
-        "- Works with missing values, so fill in only what you know\n"
-        "- Top 3 disaster types plus the features that mattered most"
+        "- Latitude, Longitude, Temperature, humidity, rainfall and wind speed\n"
+        "- Wildfire risk plus the features that mattered most"
     )
 
 with right.container(border=True, height="stretch"):
