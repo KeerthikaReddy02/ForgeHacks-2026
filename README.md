@@ -44,8 +44,8 @@ Held-out test sets. Raw numbers: `models/*_metrics.json` (also at `GET /api/mode
 | Model | Accuracy | Notes |
 |---|---|---|
 | Wildfire image: ResNet-18, 350 px, frozen conv base (`backend/ml/satellite_image_classification/`) | 97.46% | 6300 test images, ROC-AUC 0.997; wildfire precision 97.9%, recall 97.5%; confusion matrix [[2746, 74], [86, 3394]] (rows = actual nowildfire, wildfire) |
-| Disaster type: logreg | 100% | 200 held-out rows, 4 classes (earthquake, flood, hurricane, wildfire) |
+| Wildfire risk based on conditions: LightGBM | 96% | 1835 test images, ROC-AUC 98.5%, precision 95.7 %; recall 96.6% 
 
-**Read the disaster number carefully.** The Kaggle disaster dataset is synthetic: the label is fully determined by *which* measurements are present (magnitude/depth means earthquake, wind speed means hurricane, rainfall means flood, none of those means wildfire). Temperature, humidity and location alone score ~24% (chance for 4 classes). The model is therefore only meaningful when users leave unmeasured fields blank, which is how the UI works, and a request with no measurements is rejected.
+**No blank fields for conditions** The model is trained on all six factors mentioned, hence the fields cannot be left blank
 
 **Vision model preprocessing:** the notebook trained on raw `ToTensor()` pixels with no ImageNet normalisation; inference must match (`vision_engine.py` does).
