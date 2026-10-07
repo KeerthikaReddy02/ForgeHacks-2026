@@ -13,3 +13,6 @@ __pycache__/
 
 # Datasets (large; download with backend.ml.download_data)
 data/
+
+# SHAP explainer
+backend/ml/wildfire_risk_prediction/shap_explainer.pkl
