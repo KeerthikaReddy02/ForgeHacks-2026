@@ -11,5 +11,11 @@ __pycache__/
 .claude/
 .agents/
 
-# Datasets (large; download with backend.ml.download_data)
+# Datasets (large; download from Kaggle)
 data/
+
+# Training / data scripts: never commit
+backend/ml/train_vision.py
+backend/ml/train_disaster.py
+backend/ml/eval_vision.py
+backend/ml/download_data.py

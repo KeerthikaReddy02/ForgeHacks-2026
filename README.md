@@ -12,7 +12,7 @@ uv run streamlit run frontend/app.py         # :8501 (FIREWATCH_API to override 
 ## API
 | Endpoint | Swap-in |
 |---|---|
-| `POST /api/predict/image` (multipart `file`) | `services/vision.py` → PyTorch CNN + Grad-CAM |
+| `POST /api/predict/image` (multipart `file`) | `services/vision.py` → PyTorch CNN |
 | `POST /api/predict/disaster` | `services/disaster.py` → scikit-learn model |
 | `POST /api/preparedness` | `services/preparedness.py` → LLM |
 | `GET /api/regions/risk` | `services/regions.py` |
@@ -31,19 +31,12 @@ heroku logs --tail
 ```
 Later: set LLM/model secrets with `heroku config:set KEY=value`. Large model files (PyTorch) can exceed Heroku's 500 MB slug limit; use CPU-only torch or load weights from external storage.
 
-## Train the models
-Image and disaster endpoints use the trained models when present (`models/vision.pt` from `train_vision`, otherwise the notebook's ResNet-18 `.pth`; `models/disaster.joblib`) and fall back to mock output (`"mock": true`) when not.
-```
-# 1. Data (public, no Kaggle login needed)
-uv run python -m backend.ml.download_data     # -> data/wildfire, data/disaster
+## Models
+Image and disaster endpoints use the trained models when present (the notebook's ResNet-18 `.pth`, or `models/vision.pt` if you add one; `models/disaster.joblib`) and fall back to mock output (`"mock": true`) when not. Training code is not kept in the repo.
 
-# 2. Wildfire satellite classifier: EfficientNet-B0 fine-tune -> models/vision.pt
-uv run python -m backend.ml.train_vision --epochs 4          # add --max-per-class 2000 for a quick run
+Metrics (accuracy, per-class precision/recall/F1, confusion matrix) live in `models/*_metrics.json` and are served at `GET /api/model-info`. Commit the `models/` files so Heroku ships them.
 
-# 3. Disaster classifier: auto-detects schema, picks best of LogReg / RandomForest / HistGB by CV
-uv run python -m backend.ml.train_disaster                   # or --file X.csv --target COL
-```
-Metrics (accuracy, per-class precision/recall/F1, confusion matrix) are written to `models/*_metrics.json` and served at `GET /api/model-info`. Commit the `models/` files so Heroku ships them.
+Datasets (Kaggle): [wildfire](https://www.kaggle.com/datasets/abdelghaniaaba/wildfire-prediction-dataset), [disaster](https://www.kaggle.com/datasets/devindergarg/natural-disaster-prediction-dataset).
 
 ### Results
 Held-out test sets. Raw numbers: `models/*_metrics.json` (also at `GET /api/model-info`).
@@ -55,4 +48,4 @@ Held-out test sets. Raw numbers: `models/*_metrics.json` (also at `GET /api/mode
 
 **Read the disaster number carefully.** The Kaggle disaster dataset is synthetic: the label is fully determined by *which* measurements are present (magnitude/depth means earthquake, wind speed means hurricane, rainfall means flood, none of those means wildfire). Temperature, humidity and location alone score ~24% (chance for 4 classes). The model is therefore only meaningful when users leave unmeasured fields blank, which is how the UI works, and a request with no measurements is rejected.
 
-**Vision model preprocessing:** the notebook trained on raw `ToTensor()` pixels with no ImageNet normalisation; inference must match (`vision_engine.py` does). The notebook's own `test_ml_model.py` normalises and so reports ~50-60% confidence on its sample images; without normalisation they score ~100%.
+**Vision model preprocessing:** the notebook trained on raw `ToTensor()` pixels with no ImageNet normalisation; inference must match (`vision_engine.py` does).
