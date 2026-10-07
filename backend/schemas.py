@@ -60,3 +60,27 @@ class RegionRisk(BaseModel):
     lat: float
     lon: float
     risk: float  # 0..1
+
+
+class WildfireInput(BaseModel):
+    latitude: float
+    longitude: float
+    max_temp: float
+    precipitation: float
+    wind_speed: float
+    min_humidity: float
+
+
+class RiskFactor(BaseModel):
+    feature: str
+    value: float
+    shap: float
+    description: str
+    direction: str
+
+
+class WildfirePrediction(BaseModel):
+    probability: float
+    risk_level: str
+    top_factors: list[RiskFactor]
+    mock: bool = False

@@ -1,0 +1,31 @@
+{
+  "model": "lightgbm",
+  "accuracy": 0.9613079019073569,
+  "precision": 0.9571275455519829,
+  "recall": 0.9664502164502164,
+  "f1": 0.9617662897145934,
+  "roc_auc": 0.98531179760598,
+  "per_class": {
+    "No Wildfire": {
+      "precision": 0.97,
+      "recall": 0.96,
+      "f1": 0.96
+    },
+    "Wildfire": {
+      "precision": 0.96,
+      "recall": 0.97,
+      "f1": 0.96
+    }
+  },
+  "confusion_matrix": [
+    [871, 40],
+    [31, 893]
+  ],
+  "labels": [
+    "No Wildfire",
+    "Wildfire"
+  ],
+  "n_test": 1835,
+  "target": "wildfire",
+  "file": "wildfire_data_csv.csv"
+}

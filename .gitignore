@@ -19,3 +19,5 @@ backend/ml/train_vision.py
 backend/ml/train_disaster.py
 backend/ml/eval_vision.py
 backend/ml/download_data.py
+# SHAP explainer
+backend/ml/wildfire_risk_prediction/shap_explainer.pkl
