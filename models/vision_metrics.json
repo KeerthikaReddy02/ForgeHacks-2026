@@ -1,0 +1,32 @@
+{
+  "model": "resnet18",
+  "accuracy": 0.9713,
+  "roc_auc": 0.997,
+  "per_class": {
+    "nowildfire": {
+      "precision": 0.9530,
+      "recall": 0.9844,
+      "f1": 0.9684
+    },
+    "wildfire": {
+      "precision": 0.9870,
+      "recall": 0.9606,
+      "f1": 0.9736
+    }
+  },
+  "confusion_matrix": [
+    [
+      2776,
+      44
+    ],
+    [
+      137,
+      3343
+    ]
+  ],
+  "labels": [
+    "nowildfire",
+    "wildfire"
+  ],
+  "n": 6300
+}

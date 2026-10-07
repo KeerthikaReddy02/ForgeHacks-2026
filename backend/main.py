@@ -6,9 +6,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from .schemas import (DisasterInput, DisasterPrediction, ImagePrediction,
                       Preparedness, PreparednessRequest, RegionRisk)
 from .ml.paths import DISASTER_METRICS, VISION_METRICS
-from .services import disaster, preparedness, regions, vision
+from .services import disaster, history, preparedness, regions, vision
 
 app = FastAPI(title="FireWatch API")
+
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 
@@ -29,7 +30,10 @@ async def predict_image(file: UploadFile = File(...)):
 
 @app.post("/api/predict/disaster", response_model=DisasterPrediction)
 def predict_disaster(body: DisasterInput):
-    return disaster.predict_disaster(body)
+    try:
+        return disaster.predict_disaster(body)
+    except ValueError as e:
+        raise HTTPException(422, str(e))
 
 
 @app.post("/api/preparedness", response_model=Preparedness)
@@ -40,6 +44,14 @@ def get_preparedness(body: PreparednessRequest):
 @app.get("/api/regions/risk", response_model=list[RegionRisk])
 def region_risk():
     return regions.region_risks()
+
+
+@app.get("/api/regions/history")
+def region_history(year: int):
+    try:
+        return history.events_for_year(year)
+    except Exception as e:
+        raise HTTPException(502, f"NASA EONET request failed: {e}")
 
 
 @app.get("/api/model-info")

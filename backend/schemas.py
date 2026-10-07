@@ -11,10 +11,14 @@ class ImagePrediction(BaseModel):
 
 
 class DisasterInput(BaseModel):
-    region: str = "California"
-    temperature_c: float = 30.0
-    rainfall_mm: float = 10.0
-    humidity_pct: float = 40.0
+    # every measurement is optional: leaving one out means "not observed", which the model uses
+    region: str = ""
+    temperature_c: Optional[float] = None
+    rainfall_mm: Optional[float] = None
+    humidity_pct: Optional[float] = None
+    wind_speed_kmh: Optional[float] = None
+    magnitude: Optional[float] = None
+    depth_km: Optional[float] = None
     description: str = ""
     features: dict[str, Union[float, str]] = Field(default_factory=dict)  # exact dataset columns
 

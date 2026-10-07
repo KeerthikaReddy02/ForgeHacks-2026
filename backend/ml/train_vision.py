@@ -14,12 +14,15 @@ from pathlib import Path
 
 import numpy as np
 import torch
+from PIL import ImageFile
 from sklearn.metrics import accuracy_score, confusion_matrix, precision_recall_fscore_support
 from torch import nn
 from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, models, transforms
 
 from .paths import DATA, MODELS, VISION_METRICS, VISION_MODEL
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True  # a few dataset images are cut off
 
 MEAN, STD = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
 
@@ -125,6 +128,7 @@ def main():
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--no-pretrained", action="store_true")
+    ap.add_argument("--out", default=str(VISION_MODEL), help="checkpoint path (metrics json is written beside it)")
     a = ap.parse_args()
 
     torch.manual_seed(a.seed)
@@ -176,9 +180,11 @@ def main():
     print(json.dumps(m, indent=2))
 
     MODELS.mkdir(exist_ok=True)
-    torch.save({"state_dict": best_state, "classes": classes, "img_size": a.img_size}, VISION_MODEL)
-    VISION_METRICS.write_text(json.dumps(m, indent=2))
-    print(f"saved {VISION_MODEL} ({VISION_MODEL.stat().st_size / 1e6:.1f} MB)")
+    out = Path(a.out)
+    metrics_out = VISION_METRICS if out == VISION_MODEL else out.with_name(out.stem + "_metrics.json")
+    torch.save({"state_dict": best_state, "classes": classes, "img_size": a.img_size, "arch": "efficientnet_b0"}, out)
+    metrics_out.write_text(json.dumps(m, indent=2))
+    print(f"saved {out} ({out.stat().st_size / 1e6:.1f} MB) + {metrics_out.name}")
 
 
 if __name__ == "__main__":

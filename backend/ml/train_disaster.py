@@ -66,7 +66,7 @@ def split_columns(X: pd.DataFrame):
 def build_pipeline(model, num, cat, text, dense):
     parts = []
     if num:
-        parts.append(("num", Pipeline([("i", SimpleImputer(strategy="median")), ("s", StandardScaler())]), num))
+        parts.append(("num", Pipeline([("i", SimpleImputer(strategy="median", add_indicator=True)), ("s", StandardScaler())]), num))
     if cat:
         parts.append(("cat", Pipeline([
             ("i", SimpleImputer(strategy="most_frequent")),
@@ -91,6 +91,8 @@ def main():
     X = df.drop(columns=[target])
     X = X.loc[:, [c for c in X.columns if X[c].nunique() < len(X) or X[c].dtype != object]]  # drop id-like
     X = X.loc[:, X.nunique(dropna=False) > 1]
+    X = X.drop(columns=[c for c in X.columns if X[c].dtype == object or str(X[c].dtype) == "str"
+                        if X[c].nunique() > 0.3 * len(X) and X[c].astype(str).str.len().mean() <= 30])  # names/dates
     X = X.drop(columns=[c for c in X.columns if ID_NAME.search(c) or (
         pd.api.types.is_integer_dtype(X[c]) and X[c].is_unique and X[c].is_monotonic_increasing)])
     keep = y.map(y.value_counts()) >= 5  # classes too rare to stratify
@@ -134,7 +136,9 @@ def main():
     print(json.dumps(m, indent=2))
 
     pipe.fit(X, y)  # refit on everything for the shipped model
-    base = {c: (float(X[c].median()) if c in num else X[c].mode().iloc[0]) for c in num + cat}
+    # a column that is sometimes missing in training uses "missing" as its baseline: absence is signal
+    base = {c: ((np.nan if X[c].isna().any() else float(X[c].median())) if c in num else X[c].mode().iloc[0])
+            for c in num + cat}
     base.update({c: "" for c in text})
     meta = {"pipeline": pipe, "target": target, "num": num, "cat": cat, "text": text, "baseline": base,
             "ranges": {c: [float(X[c].min()), float(X[c].max())] for c in num},

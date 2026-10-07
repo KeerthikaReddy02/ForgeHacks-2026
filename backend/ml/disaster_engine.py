@@ -13,6 +13,9 @@ ALIASES = {  # API field -> regex over dataset column names
     "temperature_c": re.compile(r"temp", re.I),
     "rainfall_mm": re.compile(r"rain|precip", re.I),
     "humidity_pct": re.compile(r"humid", re.I),
+    "wind_speed_kmh": re.compile(r"wind", re.I),
+    "magnitude": re.compile(r"magnitude", re.I),
+    "depth_km": re.compile(r"depth", re.I),
     "region": re.compile(r"region|country|location|state|place|area|city", re.I),
 }
 TEXT_HINT = re.compile(r"desc|text|comment|summary|note", re.I)
@@ -32,7 +35,7 @@ class DisasterEngine:
         for field, rx in ALIASES.items():
             val = getattr(inp, field)
             col = next((c for c in self.cols if rx.search(c)), None)
-            if col is None or (field == "region" and not val):
+            if col is None or val is None or (field == "region" and not val):
                 continue
             if col in self.num and field == "temperature_c":
                 lo, hi = self.ranges[col]
@@ -59,6 +62,8 @@ class DisasterEngine:
 
     def predict(self, inp: DisasterInput) -> DisasterPrediction:
         supplied = self._map(inp)
+        if not supplied:
+            raise ValueError("Provide at least one measurement (e.g. temperature, rainfall, wind speed, magnitude).")
         probs = self.pipe.predict_proba(self._frame(supplied))[0]
         classes = self.pipe.classes_
         order = np.argsort(-probs)

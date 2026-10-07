@@ -11,14 +11,17 @@ CLASSES = ["Wildfire", "Flood", "Drought", "Hurricane", "Earthquake", "Heatwave"
 
 
 def mock_predict_disaster(inp: DisasterInput) -> DisasterPrediction:
+    temp = 30.0 if inp.temperature_c is None else inp.temperature_c
+    rain = 10.0 if inp.rainfall_mm is None else inp.rainfall_mm
+    hum = 40.0 if inp.humidity_pct is None else inp.humidity_pct
     # crude heuristic scores so the demo responds sensibly to inputs
     scores = {
-        "Wildfire": inp.temperature_c / 40 + (100 - inp.humidity_pct) / 100 - inp.rainfall_mm / 100,
-        "Flood": inp.rainfall_mm / 100 + inp.humidity_pct / 200,
-        "Drought": (100 - inp.humidity_pct) / 100 - inp.rainfall_mm / 150,
-        "Hurricane": inp.humidity_pct / 120 + inp.rainfall_mm / 200,
+        "Wildfire": temp / 40 + (100 - hum) / 100 - rain / 100,
+        "Flood": rain / 100 + hum / 200,
+        "Drought": (100 - hum) / 100 - rain / 150,
+        "Hurricane": hum / 120 + rain / 200,
         "Earthquake": 0.15,
-        "Heatwave": inp.temperature_c / 35 - inp.humidity_pct / 300,
+        "Heatwave": temp / 35 - hum / 300,
     }
     if "fire" in inp.description.lower() or "smoke" in inp.description.lower():
         scores["Wildfire"] += 0.5
@@ -27,9 +30,9 @@ def mock_predict_disaster(inp: DisasterInput) -> DisasterPrediction:
     order = np.argsort(-p)[:3]
 
     feats = [
-        FeatureContribution(feature="temperature_c", contribution=round(inp.temperature_c / 100, 3)),
-        FeatureContribution(feature="humidity_pct", contribution=round(-inp.humidity_pct / 200, 3)),
-        FeatureContribution(feature="rainfall_mm", contribution=round(-inp.rainfall_mm / 300, 3)),
+        FeatureContribution(feature="temperature_c", contribution=round(temp / 100, 3)),
+        FeatureContribution(feature="humidity_pct", contribution=round(-hum / 200, 3)),
+        FeatureContribution(feature="rainfall_mm", contribution=round(-rain / 300, 3)),
     ]
     return DisasterPrediction(
         top3=[ClassProb(label=CLASSES[i], probability=round(float(p[i]), 3)) for i in order],

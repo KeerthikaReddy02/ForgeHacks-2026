@@ -1,0 +1,66 @@
+{
+  "model": "logreg",
+  "cv_macro_f1": {
+    "logreg": 1.0,
+    "random_forest": 1.0,
+    "hist_gb": 1.0
+  },
+  "accuracy": 1.0,
+  "per_class": {
+    "Earthquake": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "Flood": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "Hurricane": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "Wildfire": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      54,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      49,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      47,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      50
+    ]
+  ],
+  "labels": [
+    "Earthquake",
+    "Flood",
+    "Hurricane",
+    "Wildfire"
+  ],
+  "n_test": 200,
+  "target": "Disaster_Type",
+  "file": "natural_disaster_dataset.csv"
+}

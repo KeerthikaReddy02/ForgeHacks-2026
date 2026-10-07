@@ -6,11 +6,13 @@ import threading
 import numpy as np
 import torch
 import torch.nn.functional as F
-from PIL import Image
+from PIL import Image, ImageFile
 from torchvision import models, transforms
 
 from ..schemas import ImagePrediction
 from .paths import VISION_MODEL
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True  # a few dataset/user images are cut off
 
 MEAN, STD = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
 
@@ -21,24 +23,41 @@ def _is_fire(name: str) -> bool:
 
 
 class VisionEngine:
+    """Loads either checkpoint format:
+    - {"state_dict", "classes", "img_size", "arch"?}  from backend.ml.train_vision (EfficientNet-B0 default)
+    - a bare ResNet-18 state dict (the notebook's satellite_image_classification_model.pth, 350px)
+    """
+
     def __init__(self, path=VISION_MODEL):
         ck = torch.load(path, map_location="cpu", weights_only=True)
-        self.classes = ck["classes"]
-        size = ck["img_size"]
-        self.model = models.efficientnet_b0(weights=None)
-        self.model.classifier[1] = torch.nn.Linear(self.model.classifier[1].in_features, len(self.classes))
-        self.model.load_state_dict(ck["state_dict"])
+        mean, std = MEAN, STD
+        if "state_dict" in ck:
+            arch, self.classes, size, state = ck.get("arch", "efficientnet_b0"), ck["classes"], ck["img_size"], ck["state_dict"]
+        else:
+            # the notebook trained on raw ToTensor() pixels (no ImageNet normalisation)
+            arch, self.classes, size, state = "resnet18", ["nowildfire", "wildfire"], 350, ck
+            mean, std = [0.0] * 3, [1.0] * 3
+        if arch == "resnet18":
+            self.model = models.resnet18(weights=None)
+            self.model.fc = torch.nn.Linear(self.model.fc.in_features, len(self.classes))
+            layer = self.model.layer4
+        else:
+            self.model = models.efficientnet_b0(weights=None)
+            self.model.classifier[1] = torch.nn.Linear(self.model.classifier[1].in_features, len(self.classes))
+            layer = self.model.features[-1]
+        self.arch = arch
+        self.model.load_state_dict(state)
         self.model.eval()
         self.tf = transforms.Compose([transforms.Resize((size, size)), transforms.ToTensor(),
-                                      transforms.Normalize(MEAN, STD)])
+                                      transforms.Normalize(mean, std)])
         self._lock = threading.Lock()  # hooks are per-model state
         self._acts = self._grads = None
-        layer = self.model.features[-1]
         layer.register_forward_hook(self._save_act)
 
     def _save_act(self, _m, _i, out):
         self._acts = out
-        out.register_hook(lambda g: setattr(self, "_grads", g))
+        if out.requires_grad:
+            out.register_hook(lambda g: setattr(self, "_grads", g))
 
     def predict(self, data: bytes) -> ImagePrediction:
         img = Image.open(io.BytesIO(data)).convert("RGB")
