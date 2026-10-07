@@ -6,7 +6,7 @@ from common import api
 ss = st.session_state
 
 st.title("Satellite image analysis", icon=":material/satellite_alt:")
-st.caption("Upload a satellite image to check whether it shows a wildfire.")
+st.caption("We use deep learning to predict whether an area is at risk of a wildfire. Upload a satellite image to try it.")
 
 left, right = st.columns(2)  # two equal-width columns
 
@@ -33,8 +33,8 @@ with right.container(border=True, height="stretch"):
         st.badge(r["label"], icon=":material/local_fire_department:" if is_fire else ":material/check:",
                  color="red" if is_fire else "green")
         st.progress(risk, text=f"Wildfire risk: {risk:.0%}")
-        st.image(
-            f"data:image/png;base64,{r['heatmap_png_b64']}",
-            caption="Grad-CAM: regions driving the prediction",
-            alt="Satellite image with a heatmap overlay highlighting areas that influenced the prediction",
+        st.caption(
+            f"The model is {r['confidence']:.0%} confident this image "
+            f"{'shows' if is_fire else 'does not show'} a wildfire. "
+            "It looks at the whole image, so it does not locate the fire within it."
         )
