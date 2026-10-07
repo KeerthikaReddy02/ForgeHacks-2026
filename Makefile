@@ -1,4 +1,4 @@
-.PHONY: help install api ui dev stop data train-vision train-disaster eval-vision test-api heroku-local
+.PHONY: help install api ui dev stop test-api heroku-local
 
 PORT_API ?= 8000
 PORT_UI  ?= 8501
@@ -24,18 +24,6 @@ dev:  ## run backend + frontend together (Ctrl-C stops both)
 stop:  ## stop any running backend/frontend
 	-pkill -f "uvicorn backend.main"
 	-pkill -f "streamlit run"
-
-data:  ## download both Kaggle datasets into data/
-	uv run python -m backend.ml.download_data
-
-train-vision:  ## fine-tune EfficientNet-B0 -> models/vision.pt (EPOCHS=4)
-	uv run python -m backend.ml.train_vision --epochs $(or $(EPOCHS),4)
-
-train-disaster:  ## train the disaster classifier -> models/disaster.joblib
-	uv run python -m backend.ml.train_disaster
-
-eval-vision:  ## evaluate the active vision model on the test split -> models/vision_metrics.json
-	uv run python -m backend.ml.eval_vision
 
 test-api:  ## smoke-test the endpoints in-process
 	uv run python -c "from fastapi.testclient import TestClient; from backend.main import app; c=TestClient(app); print(c.get('/api/health').json(), c.post('/api/predict/disaster', json={'rainfall_mm': 150}).json()['top3'][0])"

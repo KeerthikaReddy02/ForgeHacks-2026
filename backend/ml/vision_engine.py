@@ -20,7 +20,7 @@ def _is_fire(name: str) -> bool:
 
 class VisionEngine:
     """Loads either checkpoint format:
-    - {"state_dict", "classes", "img_size", "arch"?}  from backend.ml.train_vision (EfficientNet-B0 default)
+    - {"state_dict", "classes", "img_size", "arch"?}  (EfficientNet-B0 default)
     - a bare ResNet-18 state dict (the notebook's satellite_image_classification_model.pth, 350px)
     """
 
