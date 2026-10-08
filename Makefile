@@ -1,4 +1,4 @@
-.PHONY: help install api ui dev stop test-api heroku-local
+.PHONY: help install api ui dev stop test-api
 
 PORT_API ?= 8000
 PORT_UI  ?= 8501
@@ -27,6 +27,3 @@ stop:  ## stop any running backend/frontend
 
 test-api:  ## smoke-test the endpoints in-process
 	uv run python -c "from fastapi.testclient import TestClient; from backend.main import app; c=TestClient(app); print(c.get('/api/health').json(), c.post('/api/predict/disaster', json={'rainfall_mm': 150}).json()['top3'][0])"
-
-heroku-local:  ## run exactly what Heroku runs (Procfile web process)
-	PORT=$(PORT_UI) bash start.sh

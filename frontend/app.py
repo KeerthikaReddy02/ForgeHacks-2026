@@ -39,7 +39,7 @@ if "wildfire_error" not in st.session_state:
 pages = [
     st.Page("app_pages/home.py", title="Home", icon=":material/home:", default=True),
     st.Page("app_pages/satellite.py", title="Satellite image", icon=":material/satellite_alt:"),
-    st.Page("app_pages/conditions_new.py", title="Conditions form", icon=":material/thermostat:"),
+    st.Page("app_pages/conditions.py", title="Conditions form", icon=":material/thermostat:"),
     st.Page("app_pages/history.py", title="Historical map", icon=":material/public:"),
 ]
 page = st.navigation(pages)
