@@ -57,6 +57,14 @@ models/             saved models and metrics (*.json)
 
 - **Real-time streaming and alerts**: stream live satellite feeds into an automated email/SMS alert system that notifies emergency authorities of possible new ignitions.
 - **Dynamic spread modeling**: combine real-time wind, terrain and weather data to simulate and forecast 24-to-48-hour fire propagation paths.
+- **Multi-source data fusion**: combine satellite imagery, live weather, vegetation dryness (NDVI), soil moisture and terrain into a single risk model instead of separate predictors.
+- **Spatial risk heatmaps**: move from per-image and per-form predictions to continuous, map-based risk forecasts for any region, updated on a schedule.
+- **Time-series forecasting**: predict how risk changes over the coming days from weather trends, using sequence models.
+- **Fire detection and segmentation**: locate active fire fronts and burned area in an image, not just classify it.
+- **Explainable predictions**: surface SHAP feature contributions and Grad-CAM heatmaps in the UI so users can see what drove each prediction.
+- **Evacuation and resource planning**: suggest safe evacuation routes and where to position crews and equipment based on predicted spread.
+- **Mobile and low-bandwidth access**: a mobile-friendly or offline-capable version, so remote communities and field responders can use it.
+- **Public API and alert subscriptions**: let agencies and local apps pull risk data and subscribe to region-based alerts.
 
 ## Getting started
 
