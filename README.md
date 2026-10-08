@@ -1,51 +1,114 @@
-# FireWatch
+# 🔥 FireWatch
 
-Wildfire risk app: FastAPI backend + Streamlit frontend. Image and disaster endpoints use trained models (see *Train the models*); the preparedness and map endpoints are still mocks in `backend/services/`.
+**Predicting Fire. Protecting Futures.**
 
-## Run
+Built for **ForgeHacks 2026** (AI + Climate track). FireWatch estimates wildfire risk from satellite imagery and local weather conditions, and shows historical wildfire events on a live map.
+
+## Problem statement
+
+- Wildfires consume over **350 million hectares** of land every year, an area larger than the European Union, causing tens of billions in economic damage.
+- As the climate warms, wildfires are becoming more frequent and more intense. Despite the growing threat, the key risk data is fragmented and complex.
+- Local communities and responders lack fast, easy-to-use predictive tools to assess possible risks.
+
+This rising threat, the limited accessibility of risk assessment and the lack of historical context motivated us to build **FireWatch**: a predictive website that turns satellite imagery and climate data into immediate, actionable insights.
+
+## Features
+
+- **Satellite image analysis**: upload a satellite image (max 4 MB) and a ResNet-18 classifier says whether it shows wildfire or no wildfire, with a confidence score.
+- **Conditions-based risk**: enter six weather and environmental factors and a LightGBM model predicts wildfire risk. All six fields are required, because the model was trained on all of them.
+- **Historical risk map**: every wildfire event NASA EONET reports for a chosen year (last five years), shown live on a map.
+- **Model transparency**: accuracy, precision, recall and confusion matrices are shown in the app and served at `GET /api/model-info`.
+
+## Tech stack
+
+| Layer | Tools |
+|---|---|
+| Frontend | Streamlit, pydeck |
+| Backend | FastAPI, Pydantic, Uvicorn |
+| ML | PyTorch / torchvision (ResNet-18), LightGBM, scikit-learn, SHAP |
+| Data | Kaggle datasets, NASA EONET API |
+| Tooling | uv, Make |
+
+## Architecture
+
 ```
+Streamlit UI (frontend/)  ──HTTP──▶  FastAPI (backend/main.py)
+                                         ├─ services/   request handling per endpoint
+                                         └─ ml/         model loading and inference
+models/   saved models and metrics JSON
+```
+
+## Project layout
+
+```
+backend/
+  main.py           API routes
+  schemas.py        request and response models
+  services/         vision, wildfire, disaster, regions, history
+  ml/               inference engines and model notebooks
+frontend/
+  app.py            entry point, navigation, shared sidebar
+  app_pages/        home, satellite, conditions, history
+  assets/           logo and hero image
+models/             saved models and metrics (*.json)
+```
+
+## Future scope
+
+- **Real-time streaming and alerts**: stream live satellite feeds into an automated email/SMS alert system that notifies emergency authorities of possible new ignitions.
+- **Dynamic spread modeling**: combine real-time wind, terrain and weather data to simulate and forecast 24-to-48-hour fire propagation paths.
+
+## Getting started
+
+Requires Python 3.10+ (3.11 pinned) and [uv](https://docs.astral.sh/uv/).
+
+```bash
 uv sync
-uv run uvicorn backend.main:app --reload     # :8000, docs at /docs
-uv run streamlit run frontend/app.py         # :8501 (FIREWATCH_API to override URL)
+make dev          # backend on :8000 and frontend on :8501
 ```
+
+Or run them separately:
+
+```bash
+uv run uvicorn backend.main:app --reload     # API docs at http://localhost:8000/docs
+uv run streamlit run frontend/app.py         # set FIREWATCH_API to change the API URL
+```
+
+`make help` lists all targets, and `make test-api` runs a quick smoke test.
 
 ## API
-| Endpoint | Swap-in |
+
+| Endpoint | Purpose |
 |---|---|
-| `POST /api/predict/image` (multipart `file`) | `services/vision.py` → PyTorch CNN |
-| `POST /api/predict/disaster` | `services/disaster.py` → scikit-learn model |
-| `POST /api/preparedness` | `services/preparedness.py` → LLM |
-| `GET /api/regions/risk` | `services/regions.py` |
-
-*Predictions are informational and not a substitute for official emergency alerts.*
-
-## Deploy to Heroku
-One web dyno runs both processes (`start.sh`): Streamlit on `$PORT`, FastAPI internally on `127.0.0.1:8000`. The Python buildpack installs from `pyproject.toml` + `uv.lock`; `.python-version` pins 3.11.
-```
-heroku login
-heroku create <app-name>
-heroku stack:set heroku-24
-git push heroku feat/init-scaffold:main     # or: git push heroku main
-heroku open
-heroku logs --tail
-```
-Later: set LLM/model secrets with `heroku config:set KEY=value`. Large model files (PyTorch) can exceed Heroku's 500 MB slug limit; use CPU-only torch or load weights from external storage.
+| `GET /api/health` | health check |
+| `POST /api/predict/image` | wildfire or no wildfire from a satellite image (multipart `file`) |
+| `POST /api/predict/wildfire` | wildfire risk from weather and environmental conditions |
+| `POST /api/predict/disaster` | most likely disaster type from measurements |
+| `GET /api/regions/risk` | regional risk overview |
+| `GET /api/regions/history?year=` | wildfire events for a year (NASA EONET) |
+| `GET /api/model-info` | model metrics |
 
 ## Models
-Image and disaster endpoints use the trained models when present (the notebook's ResNet-18 `.pth`, or `models/vision.pt` if you add one; `models/disaster.joblib`) and fall back to mock output (`"mock": true`) when not. Training code is not kept in the repo.
 
-Metrics (accuracy, per-class precision/recall/F1, confusion matrix) live in `models/*_metrics.json` and are served at `GET /api/model-info`. Commit the `models/` files so Heroku ships them.
+Results are on held-out test sets. The raw numbers are in `models/*_metrics.json`.
 
-Datasets (Kaggle): [wildfire](https://www.kaggle.com/datasets/abdelghaniaaba/wildfire-prediction-dataset), [disaster](https://www.kaggle.com/datasets/devindergarg/natural-disaster-prediction-dataset).
-
-### Results
-Held-out test sets. Raw numbers: `models/*_metrics.json` (also at `GET /api/model-info`).
-
-| Model | Accuracy | Notes |
+| Model | Accuracy | Details |
 |---|---|---|
-| Wildfire image: ResNet-18, 350 px, frozen conv base (`backend/ml/satellite_image_classification/`) | 97.46% | 6300 test images, ROC-AUC 0.997; wildfire precision 97.9%, recall 97.5%; confusion matrix [[2746, 74], [86, 3394]] (rows = actual nowildfire, wildfire) |
-| Wildfire risk based on conditions: LightGBM | 96% | 1835 test images, ROC-AUC 98.5%, precision 95.7 %; recall 96.6% 
+| Satellite image: ResNet-18, 350 px, frozen conv base | 97.1% | 6,300 test images, ROC-AUC 0.997, wildfire precision 98.7% and recall 96.1% |
+| Wildfire risk from conditions: LightGBM | 96.1% | 1,835 test rows, ROC-AUC 0.985, precision 95.7%, recall 96.6% |
+| Disaster type: logistic regression | 100% | 200 test rows, 4 classes (earthquake, flood, hurricane, wildfire) |
 
-**No blank fields for conditions** The model is trained on all six factors mentioned, hence the fields cannot be left blank
+The image model was trained on raw `ToTensor()` pixels with no ImageNet normalisation, and `vision_engine.py` matches that at inference.
 
-**Vision model preprocessing:** the notebook trained on raw `ToTensor()` pixels with no ImageNet normalisation; inference must match (`vision_engine.py` does).
+Datasets (Kaggle): [wildfire images](https://www.kaggle.com/datasets/abdelghaniaaba/wildfire-prediction-dataset), [natural disasters](https://www.kaggle.com/datasets/devindergarg/natural-disaster-prediction-dataset). The training notebooks are in `backend/ml/`.
+
+## Team
+
+- Keerthika Reddy
+- Harshita Singh Tanwar
+- Prathit Aswar
+- Dylan Fischer
+
+## Disclaimer
+
+Predictions are informational only and are not a substitute for official emergency alerts. In an emergency, follow your local authorities.

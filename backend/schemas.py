@@ -38,23 +38,6 @@ class DisasterPrediction(BaseModel):
     mock: bool = True
 
 
-class PreparednessRequest(BaseModel):
-    image_result: Optional[ImagePrediction] = None
-    disaster_result: Optional[DisasterPrediction] = None
-    region: str = ""
-
-
-class ChecklistSection(BaseModel):
-    title: str
-    items: list[str] = Field(default_factory=list)
-
-
-class Preparedness(BaseModel):
-    explanation: str
-    checklist: list[ChecklistSection]
-    mock: bool = True
-
-
 class RegionRisk(BaseModel):
     region: str
     lat: float
