@@ -5,6 +5,8 @@ from common import api
 
 ss = st.session_state
 
+MAX_UPLOAD_BYTES = 4 * 1024 * 1024  # keep in sync with server.maxUploadSize in .streamlit/config.toml
+
 st.title("Satellite image analysis", icon=":material/satellite_alt:")
 st.caption("We use deep learning to predict whether an area is at risk of a wildfire. Upload a satellite image to try it.")
 
@@ -12,7 +14,11 @@ left, right = st.columns(2)  # two equal-width columns
 
 with left.container(border=True, height="stretch"):
     st.subheader("Upload")
-    up = st.file_uploader("Satellite image", type=["png", "jpg", "jpeg"], label_visibility="collapsed")
+    up = st.file_uploader("Satellite image", type=["png", "jpg", "jpeg"], label_visibility="collapsed",
+                       help="PNG or JPG, up to 4 MB.")
+    if up and up.size > MAX_UPLOAD_BYTES:
+        st.error(f"{up.name} is {up.size / 1024 / 1024:.1f} MB. Images must be 4 MB or smaller.", icon=":material/error:")
+        up = None
     if up:
         st.image(up, caption=up.name, alt="Uploaded satellite image")
     # Buttons return True only on the rerun right after they are clicked.
