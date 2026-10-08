@@ -4,10 +4,9 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from .schemas import (DisasterInput, DisasterPrediction, ImagePrediction,
-                      Preparedness, PreparednessRequest, RegionRisk,     WildfireInput,
-    WildfirePrediction)
+                      RegionRisk, WildfireInput, WildfirePrediction)
 from .ml.paths import DISASTER_METRICS, VISION_METRICS, WILDFIRE_METRICS
-from .services import disaster, history, preparedness, regions, vision, wildfire
+from .services import disaster, history, regions, vision, wildfire
 
 app = FastAPI(title="FireWatch API")
 
@@ -43,11 +42,6 @@ def predict_wildfire(body: WildfireInput):
 
     except ValueError as e:
         raise HTTPException( 422,str(e))
-
-@app.post("/api/preparedness", response_model=Preparedness)
-def get_preparedness(body: PreparednessRequest):
-    return preparedness.generate_preparedness(body)
-
 
 @app.get("/api/regions/risk", response_model=list[RegionRisk])
 def region_risk():
