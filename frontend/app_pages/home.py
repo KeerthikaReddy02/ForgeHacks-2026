@@ -1,4 +1,4 @@
-"""Home page: showcases the app and its two ways to assess risk."""
+"""Home page: showcases the app and its ways to assess risk."""
 from pathlib import Path
 
 import streamlit as st
@@ -22,8 +22,13 @@ with st.container(key="hero"):
             "FireWatch checks satellite images and local conditions to estimate wildfire risk "
             "and explain what drove each prediction."
         )
-        st.button("Start a prediction", type="primary", icon=":material/arrow_forward:", icon_position="right",
-            key="go_start", on_click=go, args=("Satellite image",))
+        st.button(
+            "Start a prediction",
+            type="primary",
+            icon=":material/arrow_forward:",
+            icon_position="right",
+            key="go_start",
+        )
     with pic.container(border=True, key="hero_card"):
         st.image(str(ASSETS / "hero.jpg"), alt="Satellite view of a wildfire with a smoke plume over dry hills")
         a, b = st.columns(2)
@@ -31,7 +36,7 @@ with st.container(key="hero"):
         b.markdown(":red[**Wildfire visible**]", text_alignment="right")
 
 # ---------------------------------------------------------------- three ways
-st.header("Three ways to explore risk")
+st.header("Three ways to explore risk", anchor="three-ways-to-explore-risk")
 CARDS = [
     ("Satellite image analysis", ":material/satellite_alt:",
      "We use deep learning to predict whether an area is at risk of a wildfire from a satellite image.",
@@ -57,7 +62,6 @@ for col, (title, icon, blurb, bullets, label, target) in zip(st.columns(3, gap="
 
 # ---------------------------------------------------------------- benefits
 st.space("small")
-f1, f2, f3 = st.columns(3)
-f1.markdown("**:green[:material/speed:] Fast results**  \nA prediction in a few seconds.")
-f2.markdown("**:green[:material/layers:] Clear explanations**  \nSee which factors raised the risk.")
-f3.markdown("**:green[:material/verified_user:] Informational only**  \nNot a substitute for official emergency alerts.")
+f1, f3 = st.columns(2)
+f1.markdown("**:green[:material/speed:] Fast results**  \nA prediction in a few seconds.", text_alignment="center")
+f3.markdown("**:green[:material/verified_user:] Informational only**  \nNot a substitute for official emergency alerts.", text_alignment="center")

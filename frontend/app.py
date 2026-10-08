@@ -72,7 +72,7 @@ def show_model_performance():
 
 # ---------------------------------------------------------------- sidebar (shown on every page)
 with st.sidebar:
-    st.caption("Wildfire & disaster risk assistant")
+    st.caption("Wildfire risk assistant")
 
     if cached_get("/api/model-info") is not None:
         st.badge("API connected", icon=":material/check_circle:", color="green")
@@ -105,6 +105,23 @@ st.html("""<style>
 h1 { letter-spacing: -0.02em; }
 .stButton > button { border-radius: 8px; }
 </style>""")
+
+st.html(
+    """<script>
+    if (!document.documentElement.dataset.firewatchScrollHandler) {
+        document.documentElement.dataset.firewatchScrollHandler = "true";
+        document.addEventListener("click", (event) => {
+            const target = event.target;
+            if (!(target instanceof Element) || !target.closest(".st-key-go_start button")) return;
+            setTimeout(() => {
+                const section = document.getElementById("three-ways-to-explore-risk");
+                if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 250);
+        }, true);
+    }
+    </script>""",
+    unsafe_allow_javascript=True,
+)
 
 # ---------------------------------------------------------------- run the selected page
 page.run()
