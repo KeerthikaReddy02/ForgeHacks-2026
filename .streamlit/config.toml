@@ -1,3 +1,7 @@
+[server]
+# Reject uploads over 4 MB at the widget (value is in MB).
+maxUploadSize = 4
+
 # Theme lives here (not in CSS) so every Streamlit widget picks it up automatically.
 [theme]
 primaryColor = "#b4461b"
