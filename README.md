@@ -104,7 +104,7 @@ Results are on held-out test sets. The raw numbers are in `models/*_metrics.json
 |---|---|---|
 | Satellite image: ResNet-18, 350 px, frozen conv base | 97.1% | 6,300 test images, ROC-AUC 0.997, wildfire precision 98.7% and recall 96.1% |
 | Wildfire risk from conditions: LightGBM | 96.1% | 1,835 test rows, ROC-AUC 0.985, precision 95.7%, recall 96.6% |
-| Disaster type: logistic regression | 100% | 200 test rows, 4 classes (earthquake, flood, hurricane, wildfire) |
+<!-- | Disaster type: logistic regression | 100% | 200 test rows, 4 classes (earthquake, flood, hurricane, wildfire) | -->
 
 The image model was trained on raw `ToTensor()` pixels with no ImageNet normalisation, and `vision_engine.py` matches that at inference.
 
