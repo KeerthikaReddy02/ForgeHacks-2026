@@ -108,7 +108,7 @@ Results are on held-out test sets. The raw numbers are in `models/*_metrics.json
 
 The image model was trained on raw `ToTensor()` pixels with no ImageNet normalisation, and `vision_engine.py` matches that at inference.
 
-Datasets (Kaggle): [wildfire images](https://www.kaggle.com/datasets/abdelghaniaaba/wildfire-prediction-dataset), [natural disasters](https://www.kaggle.com/datasets/devindergarg/natural-disaster-prediction-dataset). The training notebooks are in `backend/ml/`.
+Datasets (Kaggle): [wildfire images](https://www.kaggle.com/datasets/abdelghaniaaba/wildfire-prediction-dataset), [environmental factors](https://www.kaggle.com/datasets/tashasteve/quebec-wildfire-prediction-dataset). The training notebooks are in `backend/ml/`.
 
 ## Team
 
